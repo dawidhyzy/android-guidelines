@@ -25,6 +25,13 @@ Looking at the diagram from right to left:
 
 * __Event Bus__: It allows the View components to be notified of certain types of events that happen in the Model. Generally the  `DataManager` posts events which can then be subscribed to by Activities and Fragments. The event bus is __only used for very specific actions__ that are not related to only one screen and have a broadcasting nature, e.g. the user has signed out.
 
+
+# Testability
+
+In general, Android is very difficult to test effectively thanks to God objects such as `Context` and the way the framework was designed. An MVP architecture such as that which is defined here helps enormously in separating concerns and allowing individual components to be tested.
+
+Dependency injection is also a key part of our architecture and is how we achieve [dependency inversion](https://en.wikipedia.org/wiki/Dependency_inversion_principle). To do this, we use [Dagger2](https://google.github.io/dagger/) and try to avoid field injection (instead relying on constructor injection) wherever possible for vastly simpler testing via mocking.
+
 # License
 
 ```

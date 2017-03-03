@@ -135,10 +135,9 @@ See more info [here](https://source.android.com/source/code-style.html#fully-qua
 
 Fields should be defined at the __top of the file__ and they should follow the naming rules listed below.
 
-* Private, non-static field names start with __m__.
-* Private, static field names start with __s__.
-* Other fields start with a lower case letter.
-* Static final fields (constants) are ALL_CAPS_WITH_UNDERSCORES.
+* Hungarian notation is unnecessary (and a habit that I've had to work out). For explanation why, see [Jake Wharton's thorough debunking](http://jakewharton.com/just-say-no-to-hungarian-notation/).
+* All fields start with a lowercase letter and should be in camelCase.
+* The exception is static final fields (constants), which should be ALL_CAPS_WITH_UNDERSCORES.
 
 Example:
 
@@ -146,10 +145,10 @@ Example:
 public class MyClass {
     public static final int SOME_CONSTANT = 42;
     public int publicField;
-    private static MyClass sSingleton;
-    int mPackagePrivate;
-    private int mPrivate;
-    protected int mProtected;
+    private static MyClass singleton;
+    int packagePrivate;
+    private int privateInt;
+    protected int protectedInt;
 }
 ```
 
@@ -242,7 +241,7 @@ __Fields__
 Annotations applying to fields should be listed __on the same line__, unless the line reaches the maximum line length.
 
 ```java
-@Nullable @Mock DataManager mDataManager;
+@Nullable @Mock DataManager dataManager;
 ```
 
 ### 2.2.7 Limit variable scope
@@ -269,6 +268,8 @@ To exactly match the IDE settings, the imports should be:
 
 More info [here](https://source.android.com/source/code-style.html#limit-variable-scope)
 
+Ideally, you should also ensure `Setttings -> Editor -> General -> Auto Import -> Optimize imports on the fly` is enabled, as this will clean up your imports and organise them in a consistent way, recquiring no input on your part. 
+
 ### 2.2.9 Logging guidelines
 
 Use the logging methods provided by the `Log` class to print out error messages or other information that may be useful for developers to identify issues:
@@ -290,13 +291,26 @@ public class MyClass {
     }
 }
 ```
+Typing `logt` in a class will prompt Android Studio to generate this for you, although it will do so incorrectly by extracting the name of the class as a String. To fix it, change the live template for `logt` to:
 
-VERBOSE and DEBUG logs __must__ be disabled on release builds. It is also recommended to disable INFORMATION, WARNING and ERROR logs but you may want to keep them enabled if you think they may be useful to identify issues on release builds. If you decide to leave them enabled, you have to make sure that they are not leaking private information such as email addresses, user ids, etc.
+```
+private static final String TAG = $className$.class.getSimpleName();
+```
 
-To only show logs on debug builds:
+__ALL__ logging must be disabled on release builds. Many developers leave INFORMATION, WARNING and ERROR logs enabled, but it is far safer/simpler to just remove everything. Logging is also surprisingly inefficient on Android; your app's performance will thank you. This can be done in one of two ways:
 
-```java
-if (BuildConfig.DEBUG) Log.d(TAG, "The value of x is " + x);
+* Use [Timber](https://github.com/JakeWharton/timber)
+* Use the ProGuard snippet below:
+
+```
+-assumenosideeffects class android.util.Log {
+    public static boolean isLoggable(java.lang.String, int);
+    public static int v(...);
+    public static int i(...);
+    public static int w(...);
+    public static int d(...);
+    public static int e(...);
+}
 ```
 
 ### 2.2.10 Class member ordering
@@ -316,11 +330,11 @@ Example:
 ```java
 public class MainActivity extends Activity {
 
-	private String mTitle;
-    private TextView mTextViewTitle;
+	private String title;
+    private TextView textViewTitle;
 
     public void setTitle(String title) {
-    	mTitle = title;
+    	this.title = title;
     }
 
     @Override
@@ -507,19 +521,9 @@ Rx chains of operators require line-wrapping. Every operator must go in a new li
 
 ```java
 public Observable<Location> syncLocations() {
-    return mDatabaseHelper.getAllLocations()
-            .concatMap(new Func1<Location, Observable<? extends Location>>() {
-                @Override
-                 public Observable<? extends Location> call(Location location) {
-                     return mRetrofitService.getLocation(location.id);
-                 }
-            })
-            .retry(new Func2<Integer, Throwable, Boolean>() {
-                 @Override
-                 public Boolean call(Integer numRetries, Throwable throwable) {
-                     return throwable instanceof RetrofitError;
-                 }
-            });
+    return databaseHelper.getAllLocations()
+            .concatMap(location -> retrofitService.getLocation(location.id))
+            .retry(throwable -> throwable instanceof RetrofitError);
 }
 ```
 
@@ -601,7 +605,7 @@ String names start with a prefix that identifies the section they belong to. For
 
 #### 2.3.2.3 Styles and Themes
 
-Unless the rest of resources, style names are written in __UpperCamelCase__.
+Unlike the rest of resources, style names are written in __UpperCamelCase__.
 
 ### 2.3.3 Attributes ordering
 
@@ -612,6 +616,8 @@ As a general rule you should try to group similar attributes together. A good wa
 3. Layout width and layout height
 4. Other layout attributes, sorted alphabetically
 5. Remaining attributes, sorted alphabetically
+
+Android Studio will do this for you anyway by selecting `⇧ + ⌥ + ⌘ + L` and ensuring that both `Optimise immports` and `Rearrange code` are selected whilst in XML files. I would encourage you to use `⌥ + ⌘ + L` liberally whilst working in files of all types.
 
 ## 2.4 Tests style rules
 
