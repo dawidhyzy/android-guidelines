@@ -268,7 +268,7 @@ To exactly match the IDE settings, the imports should be:
 
 More info [here](https://source.android.com/source/code-style.html#limit-variable-scope)
 
-Ideally, you should also ensure `Setttings -> Editor -> General -> Auto Import -> Optimize imports on the fly` is enabled, as this will clean up your imports and organise them in a consistent way, recquiring no input on your part. 
+Ideally, you should also ensure `Setttings -> Editor -> General -> Auto Import -> Optimize imports on the fly` is enabled, as this will clean up your imports and organise them in a consistent way, requiring no input on your part. 
 
 ### 2.2.9 Logging guidelines
 
